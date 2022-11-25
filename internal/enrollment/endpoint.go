@@ -6,6 +6,9 @@ import (
 
 	"github.com/ncostamagna/go_lib_response/response"
 	"github.com/ncostamagna/gocourse_meta/meta"
+
+	courseSdk "github.com/ncostamagna/go_course_sdk/course"
+	userSdk "github.com/ncostamagna/go_course_sdk/user"
 )
 
 //Endpoints struct
@@ -63,6 +66,11 @@ func makeCreateEndpoint(s Service) Controller {
 
 		enroll, err := s.Create(ctx, req.UserID, req.CourseID)
 		if err != nil {
+
+			if errors.As(err, &userSdk.ErrNotFound{}) ||
+				errors.As(err, &courseSdk.ErrNotFound{}) {
+				return nil, response.NotFound(err.Error())
+			}
 
 			return nil, response.InternalServerError(err.Error())
 		}

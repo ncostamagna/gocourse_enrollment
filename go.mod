@@ -6,8 +6,10 @@ require (
 	github.com/go-kit/kit v0.12.0
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.4.0
+	github.com/ncostamagna/go_course_sdk v0.0.1
 	github.com/ncostamagna/go_lib_response v0.0.1
 	github.com/ncostamagna/gocourse_domain v0.0.1
+	github.com/ncostamagna/gocourse_meta v0.0.1
 	gorm.io/driver/mysql v1.4.4
 	gorm.io/gorm v1.24.1
 )
@@ -19,5 +21,5 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/ncostamagna/gocourse_meta v0.0.1 // indirect
+	github.com/ncostamagna/go_http_client v0.0.1 // indirect
 )
