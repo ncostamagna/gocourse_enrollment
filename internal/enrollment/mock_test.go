@@ -7,6 +7,7 @@ import (
 	"github.com/ncostamagna/gocourse_enrollment/internal/enrollment"
 )
 
+// RepositoryMock
 type RepositoryMock struct {
 	CreateFunc func(ctx context.Context, enrollment *domain.Enrollment) error
 	GetAllFunc func(ctx context.Context, filters enrollment.Filters, offset, limit int) ([]domain.Enrollment, error)
@@ -28,4 +29,22 @@ func (r *RepositoryMock) Update(ctx context.Context, id string, status *string) 
 
 func (r *RepositoryMock) Count(ctx context.Context, filters enrollment.Filters) (int, error) {
 	return r.CountFunc(ctx, filters)
+}
+
+// UserSdkMock
+type UserSdkMock struct {
+	GetFunc func(ctx context.Context, id string) (*domain.User, error)
+}
+
+func (r *UserSdkMock) Get(ctx context.Context, id string) (*domain.User, error) {
+	return r.GetFunc(ctx, id)
+}
+
+// CourseSdkMock
+type CourseSdkMock struct {
+	GetFunc func(ctx context.Context, id string) (*domain.Course, error)
+}
+
+func (r *CourseSdkMock) Get(ctx context.Context, id string) (*domain.Course, error) {
+	return r.GetFunc(ctx, id)
 }

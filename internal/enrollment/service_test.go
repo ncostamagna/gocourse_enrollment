@@ -18,20 +18,21 @@ func TestService_GetAll(t *testing.T) {
 
 	t.Run("should return an error", func(t *testing.T) {
 
-		var want error = errors.New("my expected error")
+		var want string = "my expected error"
 		var wantCounter int = 1
 		var counter int = 0
 		repo := &RepositoryMock{
 			GetAllFunc: func(ctx context.Context, filters enrollment.Filters, offset, limit int) ([]domain.Enrollment, error) {
 				counter++
-				return nil, want
+				return nil, errors.New("my expected error")
 			},
 		}
 
 		service := enrollment.NewService(l, nil, nil, repo)
 
 		enrollments, err := service.GetAll(context.Background(), enrollment.Filters{}, 0, 10)
-		assert.ErrorIs(t, err, want)
+		assert.Error(t, err)
+		assert.EqualError(t, err, want)
 		assert.Nil(t, enrollments)
 		assert.Equal(t, wantCounter, counter)
 	})
@@ -50,7 +51,14 @@ func TestService_GetAll(t *testing.T) {
 		repo := &RepositoryMock{
 			GetAllFunc: func(ctx context.Context, filters enrollment.Filters, offset, limit int) ([]domain.Enrollment, error) {
 				counter++
-				return want, nil
+				return []domain.Enrollment{
+					{
+						ID: "1",
+						UserID: "1",
+						CourseID: "1",
+						Status: "active",
+					},
+				}, nil
 			},
 		}
 
@@ -70,7 +78,7 @@ func TestService_Update(t *testing.T) {
 	l := log.New(io.Discard, "", 0)
 
 	t.Run("should return an error", func(t *testing.T) {
-		var want error = errors.New("my expected error")
+		var want string = "my expected error"
 		var wantCounter int = 1
 		var counter int = 0
 		var wantStatus string = "active"
@@ -81,14 +89,16 @@ func TestService_Update(t *testing.T) {
 				assert.Equal(t, wantID, id)
 				assert.NotNil(t, status)
 				assert.Equal(t, wantStatus, *status)
-				return want
+				return errors.New("my expected error")
 			},
 		}
 		service := enrollment.NewService(l, nil, nil, repo)
 
-		err := service.Update(context.Background(), wantID, &wantStatus)
+		status := "active"
+		err := service.Update(context.Background(), "1", &status)
 		
-		assert.ErrorIs(t, err, want)
+		assert.Error(t, err)
+		assert.EqualError(t, err, want)
 		assert.Equal(t, wantCounter, counter)
 	})
 
@@ -108,7 +118,8 @@ func TestService_Update(t *testing.T) {
 		}
 		service := enrollment.NewService(l, nil, nil, repo)
 
-		err := service.Update(context.Background(), wantID, &wantStatus)
+		status := "active"
+		err := service.Update(context.Background(), "1", &status)
 		assert.NoError(t, err)
 		assert.Equal(t, wantCounter, counter)
 	})
@@ -119,19 +130,20 @@ func TestService_Count(t *testing.T) {
 	l := log.New(io.Discard, "", 0)
 
 	t.Run("should return an error", func(t *testing.T) {
-		var want error = errors.New("my expected error")
+		var want string = "my expected error"
 		var wantCounter int = 1
 		var counter int = 0
 		repo := &RepositoryMock{
 			CountFunc: func(ctx context.Context, filters enrollment.Filters) (int, error) {
 				counter++
-				return 0, want
+				return 0, errors.New("my expected error")
 			},
 		}
 		service := enrollment.NewService(l, nil, nil, repo)
 
 		count, err := service.Count(context.Background(), enrollment.Filters{})
-		assert.ErrorIs(t, err, want)
+		assert.Error(t, err)
+		assert.EqualError(t, err, want)
 		assert.Zero(t, count)
 		assert.Equal(t, wantCounter, counter)
 	})
@@ -144,7 +156,7 @@ func TestService_Count(t *testing.T) {
 		repo := &RepositoryMock{
 			CountFunc: func(ctx context.Context, filters enrollment.Filters) (int, error) {
 				counter++
-				return want, nil
+				return 5, nil
 			},
 		}
 		service := enrollment.NewService(l, nil, nil, repo)
