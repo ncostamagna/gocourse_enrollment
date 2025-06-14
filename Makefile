@@ -6,7 +6,7 @@ start:
 	go run cmd/main.go
 
 test:
-	go test ./...
+	go test ./... -v
 
 cover:
 	go test ./... -coverprofile=coverage.out

@@ -64,3 +64,94 @@ func TestService_GetAll(t *testing.T) {
 	
 	
 }
+
+func TestService_Update(t *testing.T) {
+
+	l := log.New(io.Discard, "", 0)
+
+	t.Run("should return an error", func(t *testing.T) {
+		var want error = errors.New("my expected error")
+		var wantCounter int = 1
+		var counter int = 0
+		var wantStatus string = "active"
+		var wantID string = "1"
+		repo := &RepositoryMock{
+			UpdateFunc: func(ctx context.Context, id string, status *string) error {
+				counter++
+				assert.Equal(t, wantID, id)
+				assert.NotNil(t, status)
+				assert.Equal(t, wantStatus, *status)
+				return want
+			},
+		}
+		service := enrollment.NewService(l, nil, nil, repo)
+
+		err := service.Update(context.Background(), wantID, &wantStatus)
+		
+		assert.ErrorIs(t, err, want)
+		assert.Equal(t, wantCounter, counter)
+	})
+
+	t.Run("should update an enrollment", func(t *testing.T) {
+		var wantCounter int = 1
+		var counter int = 0
+		var wantStatus string = "active"
+		var wantID string = "1"
+		repo := &RepositoryMock{
+			UpdateFunc: func(ctx context.Context, id string, status *string) error {
+				counter++
+				assert.Equal(t, wantID, id)
+				assert.NotNil(t, status)
+				assert.Equal(t, wantStatus, *status)
+				return nil
+			},
+		}
+		service := enrollment.NewService(l, nil, nil, repo)
+
+		err := service.Update(context.Background(), wantID, &wantStatus)
+		assert.NoError(t, err)
+		assert.Equal(t, wantCounter, counter)
+	})
+}
+
+func TestService_Count(t *testing.T) {
+
+	l := log.New(io.Discard, "", 0)
+
+	t.Run("should return an error", func(t *testing.T) {
+		var want error = errors.New("my expected error")
+		var wantCounter int = 1
+		var counter int = 0
+		repo := &RepositoryMock{
+			CountFunc: func(ctx context.Context, filters enrollment.Filters) (int, error) {
+				counter++
+				return 0, want
+			},
+		}
+		service := enrollment.NewService(l, nil, nil, repo)
+
+		count, err := service.Count(context.Background(), enrollment.Filters{})
+		assert.ErrorIs(t, err, want)
+		assert.Zero(t, count)
+		assert.Equal(t, wantCounter, counter)
+	})
+
+	t.Run("should return the count of enrollments", func(t *testing.T) {
+		var want int = 5
+		var wantCounter int = 1
+		var counter int = 0
+
+		repo := &RepositoryMock{
+			CountFunc: func(ctx context.Context, filters enrollment.Filters) (int, error) {
+				counter++
+				return want, nil
+			},
+		}
+		service := enrollment.NewService(l, nil, nil, repo)
+
+		count, err := service.Count(context.Background(), enrollment.Filters{})
+		assert.NoError(t, err)
+		assert.Equal(t, want, count)
+		assert.Equal(t, wantCounter, counter)
+	})
+}
