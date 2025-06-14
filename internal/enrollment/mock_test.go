@@ -33,18 +33,18 @@ func (r *RepositoryMock) Count(ctx context.Context, filters enrollment.Filters) 
 
 // UserSdkMock
 type UserSdkMock struct {
-	GetFunc func(ctx context.Context, id string) (*domain.User, error)
+	GetFunc func(id string) (*domain.User, error)
 }
 
-func (r *UserSdkMock) Get(ctx context.Context, id string) (*domain.User, error) {
-	return r.GetFunc(ctx, id)
+func (r *UserSdkMock) Get(id string) (*domain.User, error) {
+	return r.GetFunc(id)
 }
 
 // CourseSdkMock
 type CourseSdkMock struct {
-	GetFunc func(ctx context.Context, id string) (*domain.Course, error)
+	GetFunc func(id string) (*domain.Course, error)
 }
 
-func (r *CourseSdkMock) Get(ctx context.Context, id string) (*domain.Course, error) {
-	return r.GetFunc(ctx, id)
+func (r *CourseSdkMock) Get(id string) (*domain.Course, error) {
+	return r.GetFunc(id)
 }
