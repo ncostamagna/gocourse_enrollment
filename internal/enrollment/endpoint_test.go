@@ -51,7 +51,7 @@ func TestCreateEndpoint(t *testing.T) {
 		courseSdkMock courseSdk.Transport
 		wantErr error
 		wantCode int
-		wantResponse interface{}
+		wantResponse *domain.Enrollment
 	}{
 		{
 			tag: "should return an error if user sdk returns an unexpected error",
@@ -103,6 +103,52 @@ func TestCreateEndpoint(t *testing.T) {
 			wantErr: courseSdk.ErrNotFound{ Message: "course not found" },
 			wantCode: http.StatusNotFound,
 		},
+		{
+			tag: "should return an error if repository returns an unexpected error",
+			userSdkMock: &UserSdkMock{
+				GetFunc: func(id string) (*domain.User, error) {
+					return &domain.User{}, nil
+				},
+			},
+			courseSdkMock: &CourseSdkMock{
+				GetFunc: func(id string) (*domain.Course, error) {
+					return &domain.Course{}, nil
+				},
+			},
+			repositoryMock: &RepositoryMock{
+				CreateFunc: func(ctx context.Context, enrollment *domain.Enrollment) error {
+					return errors.New("unexpected error")
+				},
+			},
+			wantErr: errors.New("unexpected error"),
+			wantCode: http.StatusInternalServerError,
+		},
+		{
+			tag: "should record the enrollment created",
+			userSdkMock: &UserSdkMock{
+				GetFunc: func(id string) (*domain.User, error) {
+					return &domain.User{}, nil
+				},
+			},
+			courseSdkMock: &CourseSdkMock{
+				GetFunc: func(id string) (*domain.Course, error) {
+					return &domain.Course{}, nil
+				},
+			},
+			repositoryMock: &RepositoryMock{
+				CreateFunc: func(ctx context.Context, enrollment *domain.Enrollment) error {
+					enrollment.ID = "101021"
+					return nil
+				},
+			},
+			wantCode: http.StatusCreated,
+			wantResponse: &domain.Enrollment{
+					ID: "101021",
+					UserID: "1",
+					CourseID: "4",
+					Status: "P",
+				},
+		},
 	}
 
 	for _, obj := range obj {
@@ -118,7 +164,18 @@ func TestCreateEndpoint(t *testing.T) {
 				assert.EqualError(t, obj.wantErr, r.Error())
 				assert.Equal(t, obj.wantCode, r.StatusCode())
 			} else {
-				
+				assert.Nil(t, err)
+				assert.NotNil(t, resp)
+
+				r := resp.(response.Response)
+				assert.Equal(t, obj.wantCode, r.StatusCode())
+				assert.Empty(t, r.Error())
+
+				enrollment := r.GetData().(*domain.Enrollment)
+				assert.Equal(t, obj.wantResponse.ID, enrollment.ID)
+				assert.Equal(t, obj.wantResponse.UserID, enrollment.UserID)
+				assert.Equal(t, obj.wantResponse.CourseID, enrollment.CourseID)
+				assert.Equal(t, obj.wantResponse.Status, enrollment.Status)
 			}
 		})
 	}
