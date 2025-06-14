@@ -271,3 +271,70 @@ func TestGetAllEndpoint(t *testing.T) {
 		}
 	})
 }
+
+func TestUpdateEndpoint(t *testing.T) {
+
+	l := log.New(io.Discard, "", 0)
+
+	t.Run("should return an error if status is empty", func(t *testing.T) {
+		endpoint := enrollment.MakeEndpoints(nil, enrollment.Config{})
+		status := ""
+		_, err := endpoint.Update(context.Background(), enrollment.UpdateReq{Status: &status})
+		assert.Error(t, err)
+
+		resp := err.(response.Response)
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode())
+		assert.EqualError(t, enrollment.ErrStatusRequired, resp.Error())
+	})
+
+	t.Run("should return an error if repository returns a not found error", func(t *testing.T) {
+		service := enrollment.NewService(l, nil, nil, &RepositoryMock{
+			UpdateFunc: func(ctx context.Context, id string, status *string) error {
+				return enrollment.ErrNotFound{EnrollmentsID: id}
+			},
+		})
+		endpoint := enrollment.MakeEndpoints(service, enrollment.Config{})
+		status := "5"
+		_, err := endpoint.Update(context.Background(), enrollment.UpdateReq{ID: "20", Status: &status})
+		assert.Error(t, err)
+
+		resp := err.(response.Response)
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode())
+		assert.EqualError(t, enrollment.ErrNotFound{EnrollmentsID: "20"}, resp.Error())
+	})
+
+	t.Run("should return an error if repository returns an unexpected error", func(t *testing.T) {
+		wantErr := errors.New("unexpected error")
+		service := enrollment.NewService(l, nil, nil, &RepositoryMock{
+			UpdateFunc: func(ctx context.Context, id string, status *string) error {
+				return errors.New("unexpected error")
+			},
+		})
+		endpoint := enrollment.MakeEndpoints(service, enrollment.Config{})
+		status := "5"
+		_, err := endpoint.Update(context.Background(), enrollment.UpdateReq{ID: "20", Status: &status})
+		assert.Error(t, err)
+
+		resp := err.(response.Response)
+		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode())
+		assert.EqualError(t, wantErr, resp.Error())
+	})
+
+	t.Run("should return success", func(t *testing.T) {
+		service := enrollment.NewService(l, nil, nil, &RepositoryMock{
+			UpdateFunc: func(ctx context.Context, id string, status *string) error {
+				assert.Equal(t, "20", id)
+				assert.Equal(t, "5", *status)
+				return nil
+			},
+		})
+		endpoint := enrollment.MakeEndpoints(service, enrollment.Config{})
+		status := "5"
+		resp, err := endpoint.Update(context.Background(), enrollment.UpdateReq{ID: "20", Status: &status})
+		assert.Nil(t, err)
+
+		r := resp.(response.Response)
+		assert.Equal(t, http.StatusOK, r.StatusCode())
+		assert.Nil(t, r.GetData())
+	})
+}
