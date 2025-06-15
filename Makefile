@@ -1,3 +1,5 @@
+.PHONY: install start test cover
+
 install:
 	go mod tidy
 	docker compose up -d
