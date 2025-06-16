@@ -3,15 +3,15 @@ package enrollment_test
 import (
 	"context"
 
-	"github.com/ncostamagna/gocourse_enrollment/internal/enrollment"
 	"github.com/ncostamagna/gocourse_domain/domain"
+	"github.com/ncostamagna/gocourse_enrollment/internal/enrollment"
 )
 
 type mockRepository struct {
 	CreateMock func(ctx context.Context, enroll *domain.Enrollment) error
 	GetAllMock func(ctx context.Context, filters enrollment.Filters, offset, limit int) ([]domain.Enrollment, error)
 	UpdateMock func(ctx context.Context, id string, status *string) error
-	CountMock func(ctx context.Context, filters enrollment.Filters) (int, error)
+	CountMock  func(ctx context.Context, filters enrollment.Filters) (int, error)
 }
 
 func (m *mockRepository) Create(ctx context.Context, enroll *domain.Enrollment) error {

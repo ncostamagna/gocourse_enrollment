@@ -7,17 +7,17 @@ import (
 	"log"
 	"testing"
 
-	userSdk "github.com/ncostamagna/go_course_sdk/user/mock"
 	courseSdk "github.com/ncostamagna/go_course_sdk/course/mock"
+	userSdk "github.com/ncostamagna/go_course_sdk/user/mock"
 
 	"github.com/ncostamagna/gocourse_domain/domain"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/ncostamagna/gocourse_enrollment/internal/enrollment"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestService_GetAll(t *testing.T) {
-	
+
 	l := log.New(io.Discard, "", 0)
 
 	t.Run("should return an error", func(t *testing.T) {
@@ -44,10 +44,10 @@ func TestService_GetAll(t *testing.T) {
 	t.Run("should return all enrollments", func(t *testing.T) {
 		want := []domain.Enrollment{
 			{
-				ID: "1",
-				UserID: "11",
+				ID:       "1",
+				UserID:   "11",
 				CourseID: "22",
-				Status: "P",
+				Status:   "P",
 			},
 		}
 		var wantCounter int = 1
@@ -57,10 +57,10 @@ func TestService_GetAll(t *testing.T) {
 				counter++
 				return []domain.Enrollment{
 					{
-						ID: "1",
-						UserID: "11",
+						ID:       "1",
+						UserID:   "11",
 						CourseID: "22",
-						Status: "P",
+						Status:   "P",
 					},
 				}, nil
 			},
@@ -74,7 +74,7 @@ func TestService_GetAll(t *testing.T) {
 		assert.NotNil(t, enrollments)
 		assert.Equal(t, wantCounter, counter)
 		assert.Equal(t, want, enrollments)
-		
+
 	})
 }
 
@@ -300,5 +300,5 @@ func TestService_Create(t *testing.T) {
 		assert.Equal(t, wantCourseID, enrollment.CourseID)
 		assert.Equal(t, wantStatus, enrollment.Status)
 	})
-		
+
 }

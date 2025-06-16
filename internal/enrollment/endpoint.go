@@ -11,7 +11,7 @@ import (
 	userSdk "github.com/ncostamagna/go_course_sdk/user"
 )
 
-//Endpoints struct
+// Endpoints struct
 type (
 	Controller func(ctx context.Context, request interface{}) (interface{}, error)
 
@@ -43,7 +43,7 @@ type (
 	}
 )
 
-//MakeEndpoints handler endpoints
+// MakeEndpoints handler endpoints
 func MakeEndpoints(s Service, config Config) Endpoints {
 	return Endpoints{
 		Create: makeCreateEndpoint(s),

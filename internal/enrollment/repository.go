@@ -22,7 +22,7 @@ type (
 	}
 )
 
-//NewRepo is a repositories handler
+// NewRepo is a repositories handler
 func NewRepo(db *gorm.DB, l *log.Logger) Repository {
 	return &repo{
 		db:  db,
